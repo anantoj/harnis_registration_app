@@ -1,5 +1,10 @@
 # Harnis Registration App
 
+## Set Email & Password
+1. Buka aplikasi CMD (commend prompt)
+2. setx APP_EMAIL "email@mail.com"
+3. setx APP_PASSWORD "password"
+
 ## Cara Cari IP Address
 1.	Connect laptop ke hotspot handphone yang akan dipakai (pakai internet hp)
 2.	Buka aplikasi CMD (commend prompt)

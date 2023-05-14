@@ -107,4 +107,5 @@ if __name__ == "__main__":
         if row["BUSINESS EMAIL"] != "":
             qr = generate_qr(row, args.ip)
             send_email(row, args.subject, qr)
-
+            
+    print("Emails sent succesfully!")
