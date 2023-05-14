@@ -93,7 +93,7 @@ def send_email(
 if __name__ == "__main__":
     # Read email addresses from Excel file
     args = parse_arguments()
-    attendees_df = pd.read_excel(args.excel_path, skiprows=3)
+    attendees_df = pd.read_excel(f"{args.excel_path}.xlsx", skiprows=3)
     
     attendees_df["SHOW"] = "NO"
     attendees_df["ID"] = ""
@@ -101,8 +101,8 @@ if __name__ == "__main__":
     attendees_df["MOBILE NUMBER"] = attendees_df["MOBILE NUMBER"].astype(str)
     attendees_df.to_excel("output.xlsx", index=False)
 
-    # for _, row in attendees_df.iterrows():
-    #     if row["BUSINESS EMAIL"] != "":
-    #         qr = generate_qr(row, args.ip)
-    #         send_email(row, args.subject, qr)
+    for _, row in attendees_df.iterrows():
+        if row["BUSINESS EMAIL"] != "":
+            qr = generate_qr(row, args.ip)
+            send_email(row, args.subject, qr)
 
