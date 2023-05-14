@@ -101,6 +101,8 @@ if __name__ == "__main__":
     attendees_df["MOBILE NUMBER"] = attendees_df["MOBILE NUMBER"].astype(str)
     attendees_df.to_excel("output.xlsx", index=False)
 
+    print("Sending email from: ", os.getenv("APP_EMAIL"))
+
     for _, row in attendees_df.iterrows():
         if row["BUSINESS EMAIL"] != "":
             qr = generate_qr(row, args.ip)
