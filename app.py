@@ -18,6 +18,7 @@ def verify():
     if verify_attendee(attendee_id, attendee_df):
         attendee = attendee_df.loc[attendee_df["ID"] == attendee_id].iloc[0]
         attendee_df["SHOW"][attendee_df["ID"] == attendee_id] = "YES"
+        attendee_df.to_excel("output.xlsx", index=False)
         return render_template(
             "welcome.html",
             first_name=attendee["FIRST NAME"],
