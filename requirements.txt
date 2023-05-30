@@ -1,4 +1,5 @@
-smtplib
 pandas
 qrcode
 openpyxl
+tk
+netifaces

@@ -1,0 +1,97 @@
+import tkinter as tk
+from tkinter import filedialog
+from tkinter import messagebox
+import threading
+import subprocess
+
+import netifaces
+
+
+def get_local_ip_address():
+    interfaces = netifaces.interfaces()
+    for interface in interfaces:
+        addresses = netifaces.ifaddresses(interface)
+        if netifaces.AF_INET in addresses:
+            for address in addresses[netifaces.AF_INET]:
+                ip_address = address["addr"]
+                if ip_address != "127.0.0.1":
+                    return ip_address
+
+    return None  # Return None if unable to retrieve the IP address
+
+
+flask_process = None  # Global variable to hold the subprocess object
+
+
+def blast_qr_code():
+    def browse_file():
+        filename = filedialog.askopenfilename(
+            filetypes=[("Excel Files", "*.xlsx"), ("All Files", "*.*")]
+        )
+        if filename:
+            messagebox.showinfo("File Selected", f"Selected File: {filename}")
+
+    def send_emails():
+        subject = subject_entry.get()
+        if not subject:
+            messagebox.showwarning(
+                "Missing Subject", "Please enter a subject for the emails."
+            )
+            return
+        messagebox.showinfo(
+            "Sending Emails",
+            f"Sending emails with subject: {subject} and IP Address: {get_local_ip_address()}",
+        )
+        # Call the send_email() function here with the required parameters
+
+    # Create the Blast QR Code page
+    blast_qr_code_page = tk.Toplevel(root)
+    blast_qr_code_page.title("Blast QR Code")
+    blast_qr_code_page.geometry("400x200")
+
+    browse_button = tk.Button(
+        blast_qr_code_page, text="Browse Excel File", command=browse_file
+    )
+    browse_button.pack(pady=10)
+
+    subject_label = tk.Label(blast_qr_code_page, text="Email Subject:")
+    subject_label.pack()
+
+    subject_entry = tk.Entry(blast_qr_code_page)
+    subject_entry.pack(pady=5)
+
+    send_button = tk.Button(blast_qr_code_page, text="Send Emails", command=send_emails)
+    send_button.pack(pady=10)
+
+
+def run_scanner_app():
+    def run_flask_app():
+        global flask_process  # Declare the variable as global
+        flask_process = subprocess.Popen(["flask", "run", "--host=0.0.0.0"])
+
+    def stop_flask_app():
+        flask_process.terminate()
+        messagebox.showinfo("Stop Scanner", "Scanner app stopped.")
+
+    messagebox.showinfo("Run Scanner App", "Running the Scanner app in the background.")
+    run_button.config(text="Stop Scanner", command=stop_flask_app)
+
+    # Start a new thread to run the Flask app
+    flask_thread = threading.Thread(target=run_flask_app)
+    flask_thread.start()
+
+
+if __name__ == "__main__":
+    # Create the main application window
+    root = tk.Tk()
+    root.title("QR Code App")
+    root.geometry("400x200")
+
+    blast_button = tk.Button(root, text="Blast QR Code", command=blast_qr_code)
+    blast_button.pack(pady=10)
+
+    run_button = tk.Button(root, text="Run Scanner", command=run_scanner_app)
+    run_button.pack(pady=10)
+
+    # Start the main event loop
+    root.mainloop()

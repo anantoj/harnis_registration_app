@@ -10,7 +10,8 @@ from email.mime.image import MIMEImage
 from email.message import EmailMessage
 import os
 
-pd.set_option('mode.chained_assignment', None)
+pd.set_option("mode.chained_assignment", None)
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -41,7 +42,7 @@ def generate_id(attendee):
 def generate_qr(attendee, ip_address):
     # Generate attendee ID and save to file
     attendee_id = generate_id(attendee)
-    
+
     # Generate QR code with attendee ID and Flask server URL
     url = f"http:/{ip_address}:5000/verify"
     data = f"attendee_id: {attendee_id}"
@@ -58,9 +59,7 @@ def generate_qr(attendee, ip_address):
     return None
 
 
-def send_email(
-    attendee, subject, qr_image=None
-):
+def send_email(attendee, subject, qr_image=None):
     # Create message object
     msg = MIMEMultipart()
     msg["Subject"] = subject
@@ -94,7 +93,7 @@ if __name__ == "__main__":
     # Read email addresses from Excel file
     args = parse_arguments()
     attendees_df = pd.read_excel(f"{args.excel_path}.xlsx", skiprows=3)
-    
+
     attendees_df["SHOW"] = "NO"
     attendees_df["ID"] = ""
     attendees_df.fillna("", inplace=True)
@@ -107,5 +106,5 @@ if __name__ == "__main__":
         if row["BUSINESS EMAIL"] != "":
             qr = generate_qr(row, args.ip)
             send_email(row, args.subject, qr)
-            
+
     print("Emails sent succesfully!")

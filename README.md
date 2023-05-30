@@ -24,4 +24,4 @@
 1.	Buka aplikasi CMD (commend prompt)
 2.	Ketik cd desktop
 3.	Ketik cd harnis_registration_app
-1.	Ketik flask run --host=0.0.0.0
+4.	Ketik flask run --host=0.0.0.0
