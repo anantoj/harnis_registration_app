@@ -9,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from email.message import EmailMessage
 import os
+import io
 
 pd.set_option("mode.chained_assignment", None)
 
@@ -52,11 +53,18 @@ def generate_qr(attendee, ip_address):
     img = qr.make_image(fill_color="black", back_color="white")
     img.save(f"qr_codes/{attendee_id}.png")
 
-    with open(f"qr_codes/{attendee_id}.png", "rb") as f:
-        qr_image = f.read()
-        return qr_image
+    # with open(f"qr_codes/{attendee_id}.png", "rb") as f:
+    #     qr_image = f.read()
+    #     return qr_image
 
-    return None
+    # Save the image to an in-memory buffer
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    qr_image = buffer.read()
+    return qr_image
+
 
 
 def send_email(attendee, subject, qr_image=None):
@@ -92,7 +100,7 @@ def send_email(attendee, subject, qr_image=None):
 if __name__ == "__main__":
     # Read email addresses from Excel file
     args = parse_arguments()
-    attendees_df = pd.read_excel(f"{args.excel_path}.xlsx", skiprows=3)
+    attendees_df = pd.read_excel(f"{args.excel_path}", skiprows=3)
 
     attendees_df["SHOW"] = "NO"
     attendees_df["ID"] = ""

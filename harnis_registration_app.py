@@ -5,6 +5,7 @@ import threading
 import subprocess
 
 import netifaces
+import os
 
 
 def get_local_ip_address():
@@ -20,16 +21,17 @@ def get_local_ip_address():
     return None  # Return None if unable to retrieve the IP address
 
 
-flask_process = None  # Global variable to hold the subprocess object
-
+flask_process = None  
+attendance_list = None
 
 def blast_qr_code():
     def browse_file():
-        filename = filedialog.askopenfilename(
+        global attendance_list
+        attendance_list = filedialog.askopenfilename(
             filetypes=[("Excel Files", "*.xlsx"), ("All Files", "*.*")]
         )
-        if filename:
-            messagebox.showinfo("File Selected", f"Selected File: {filename}")
+        if attendance_list:
+            messagebox.showinfo("File Selected", f"Selected File: {attendance_list}")
 
     def send_emails():
         subject = subject_entry.get()
@@ -38,11 +40,36 @@ def blast_qr_code():
                 "Missing Subject", "Please enter a subject for the emails."
             )
             return
-        messagebox.showinfo(
-            "Sending Emails",
-            f"Sending emails with subject: {subject} and IP Address: {get_local_ip_address()}",
-        )
+
+        ip_address = get_local_ip_address()
+        if os.getenv("APP_EMAIL") is None or os.getenv("APP_PASSWORD") is None:
+            messagebox.showinfo(
+                "Missing Email and Password",
+                f"Please enter Email and Password in Environment Variable",
+            )
+            return
         # Call the send_email() function here with the required parameters
+        if attendance_list:
+            messagebox.showinfo(
+                "Sending Emails",
+                f"Sending emails with subject: {subject} and IP Address: {ip_address}",
+            )
+            subprocess.run([
+                "python", "qr_generator.py", 
+                "--ip", ip_address, 
+                "--subject", subject,
+                "--excel_path", attendance_list
+            ])
+
+            messagebox.showinfo(
+                "Success",
+                "Emails sent successfully",
+            )
+        else:
+            messagebox.showinfo("Error", f"Input Attendance List first")
+            return
+
+
 
     # Create the Blast QR Code page
     blast_qr_code_page = tk.Toplevel(root)
@@ -84,7 +111,7 @@ def run_scanner_app():
 if __name__ == "__main__":
     # Create the main application window
     root = tk.Tk()
-    root.title("QR Code App")
+    root.title("Harnis Attendance List App")
     root.geometry("400x200")
 
     blast_button = tk.Button(root, text="Blast QR Code", command=blast_qr_code)
