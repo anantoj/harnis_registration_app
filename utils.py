@@ -14,29 +14,15 @@ import io
 pd.set_option("mode.chained_assignment", None)
 
 
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--ip", type=str, default="localhost", help="IP address for Flask server"
-    )
-    parser.add_argument(
-        "--subject", type=str, required=True, help="Subject of the emails"
-    )
-    parser.add_argument(
-        "--excel_path", type=str, required=True, help="Path to attendance list excel"
-    )
-    return parser.parse_args()
-
-
 # Generate random IDs for attendees
 def generate_id(attendee):
     letters = string.ascii_lowercase
     attendee_id = "".join(random.choice(letters) for i in range(5))
+
     df = pd.read_excel("output.xlsx")
     df["ID"][df["BUSINESS EMAIL"] == attendee["BUSINESS EMAIL"]] = attendee_id
     df.to_excel("output.xlsx", index=False)
-    # with open("attendee_ids.txt", "a") as f:
-    #     f.write(f"{attendee_id}\n")
+
     return attendee_id
 
 
@@ -51,11 +37,6 @@ def generate_qr(attendee, ip_address):
     qr.add_data(f"{url}?id={attendee_id}")
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
-    # img.save(f"qr_codes/{attendee_id}.png")
-
-    # with open(f"qr_codes/{attendee_id}.png", "rb") as f:
-    #     qr_image = f.read()
-    #     return qr_image
 
     # Save the image to an in-memory buffer
     buffer = io.BytesIO()
@@ -64,7 +45,6 @@ def generate_qr(attendee, ip_address):
 
     qr_image = buffer.read()
     return qr_image
-
 
 
 def send_email(attendee, subject, qr_image=None):
@@ -95,24 +75,3 @@ def send_email(attendee, subject, qr_image=None):
         smtp.login(os.getenv("APP_EMAIL"), os.getenv("APP_PASSWORD"))
 
         smtp.sendmail(msg["From"], msg["To"], msg.as_string())
-
-
-if __name__ == "__main__":
-    # Read email addresses from Excel file
-    args = parse_arguments()
-    attendees_df = pd.read_excel(f"{args.excel_path}", skiprows=3)
-
-    attendees_df["SHOW"] = "NO"
-    attendees_df["ID"] = ""
-    attendees_df.fillna("", inplace=True)
-    attendees_df["MOBILE NUMBER"] = attendees_df["MOBILE NUMBER"].astype(str)
-    attendees_df.to_excel("output.xlsx", index=False)
-
-    print("Sending email from: ", os.getenv("APP_EMAIL"))
-
-    for _, row in attendees_df.iterrows():
-        if row["BUSINESS EMAIL"] != "":
-            qr = generate_qr(row, args.ip)
-            send_email(row, args.subject, qr)
-
-    print("Emails sent succesfully!")

@@ -7,6 +7,10 @@ import subprocess
 import netifaces
 import os
 
+import pandas as pd
+
+from utils import generate_qr, send_email
+
 
 def get_local_ip_address():
     interfaces = netifaces.interfaces()
@@ -18,11 +22,12 @@ def get_local_ip_address():
                 if ip_address != "127.0.0.1":
                     return ip_address
 
-    return None  # Return None if unable to retrieve the IP address
+    return None
 
 
-flask_process = None  
+flask_process = None
 attendance_list = None
+
 
 def blast_qr_code():
     def browse_file():
@@ -54,18 +59,29 @@ def blast_qr_code():
                 f"Please enter Email and Password in Environment Variable",
             )
             return
-        # Call the send_email() function here with the required parameters
+
         if attendance_list:
             messagebox.showinfo(
                 "Sending Emails",
                 f"Sending emails with subject: {subject} and IP Address: {ip_address}",
             )
-            subprocess.run([
-                "python", "qr_generator.py", 
-                "--ip", ip_address, 
-                "--subject", subject,
-                "--excel_path", attendance_list
-            ])
+
+            # Read email addresses from Excel file
+            attendees_df = pd.read_excel(attendance_list, skiprows=3)
+
+            attendees_df["SHOW"] = "NO"
+            attendees_df["ID"] = ""
+            attendees_df.fillna("", inplace=True)
+            attendees_df["MOBILE NUMBER"] = attendees_df["MOBILE NUMBER"].astype(str)
+            attendees_df.to_excel("output.xlsx", index=False)
+
+            print("Sending email from: ", os.getenv("APP_EMAIL"))
+            for _, row in attendees_df.iterrows():
+                if row["BUSINESS EMAIL"] != "":
+                    qr = generate_qr(row, ip_address)
+                    send_email(row, subject, qr)
+
+            print("Emails sent succesfully!")
 
             messagebox.showinfo(
                 "Success",
@@ -76,15 +92,17 @@ def blast_qr_code():
             return
 
             # Hide the main window
+
     root.withdraw()
 
-
-   # Create the Blast QR Code page
+    # Create the Blast QR Code page
     blast_qr_code_page = tk.Toplevel()
     blast_qr_code_page.title("Blast QR Code")
     blast_qr_code_page.geometry("400x200")
 
-    browse_button = tk.Button(blast_qr_code_page, text="Browse Excel File", command=browse_file)
+    browse_button = tk.Button(
+        blast_qr_code_page, text="Browse Excel File", command=browse_file
+    )
     browse_button.pack(pady=10)
 
     subject_label = tk.Label(blast_qr_code_page, text="Email Subject:")
