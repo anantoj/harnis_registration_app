@@ -3,3 +3,4 @@ qrcode
 openpyxl
 tk
 netifaces
+pillow
