@@ -51,7 +51,7 @@ def generate_qr(attendee, ip_address):
     qr.add_data(f"{url}?id={attendee_id}")
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
-    img.save(f"qr_codes/{attendee_id}.png")
+    # img.save(f"qr_codes/{attendee_id}.png")
 
     # with open(f"qr_codes/{attendee_id}.png", "rb") as f:
     #     qr_image = f.read()

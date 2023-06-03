@@ -42,6 +42,12 @@ def blast_qr_code():
             return
 
         ip_address = get_local_ip_address()
+        if ip_address is None:
+            messagebox.showinfo(
+                "IP Address Error",
+                "Cannot Retreive IP Address",
+            )
+            return
         if os.getenv("APP_EMAIL") is None or os.getenv("APP_PASSWORD") is None:
             messagebox.showinfo(
                 "Missing Email and Password",
@@ -69,16 +75,16 @@ def blast_qr_code():
             messagebox.showinfo("Error", f"Input Attendance List first")
             return
 
+            # Hide the main window
+    root.withdraw()
 
 
-    # Create the Blast QR Code page
-    blast_qr_code_page = tk.Toplevel(root)
+   # Create the Blast QR Code page
+    blast_qr_code_page = tk.Toplevel()
     blast_qr_code_page.title("Blast QR Code")
     blast_qr_code_page.geometry("400x200")
 
-    browse_button = tk.Button(
-        blast_qr_code_page, text="Browse Excel File", command=browse_file
-    )
+    browse_button = tk.Button(blast_qr_code_page, text="Browse Excel File", command=browse_file)
     browse_button.pack(pady=10)
 
     subject_label = tk.Label(blast_qr_code_page, text="Email Subject:")
@@ -86,9 +92,17 @@ def blast_qr_code():
 
     subject_entry = tk.Entry(blast_qr_code_page)
     subject_entry.pack(pady=5)
+    subject_entry.focus()  # Set focus to the subject_entry widget
 
     send_button = tk.Button(blast_qr_code_page, text="Send Emails", command=send_emails)
     send_button.pack(pady=10)
+
+    def close_blast_qr_code():
+        # Show the main window and destroy the Blast QR Code page
+        root.deiconify()
+        blast_qr_code_page.destroy()
+
+    blast_qr_code_page.protocol("WM_DELETE_WINDOW", close_blast_qr_code)
 
 
 def run_scanner_app():
