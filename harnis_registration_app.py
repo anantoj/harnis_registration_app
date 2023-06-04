@@ -131,6 +131,7 @@ def run_scanner_app():
     def stop_flask_app():
         flask_process.terminate()
         messagebox.showinfo("Stop Scanner", "Scanner app stopped.")
+        run_button.config(text="Run Scanner", command=run_scanner_app)
 
     messagebox.showinfo("Run Scanner App", "Running the Scanner app in the background.")
     run_button.config(text="Stop Scanner", command=stop_flask_app)
