@@ -1,4 +1,3 @@
-import argparse
 import qrcode
 import random
 import string

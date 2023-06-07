@@ -3,13 +3,15 @@ from tkinter import filedialog
 from tkinter import messagebox
 import threading
 import subprocess
-
-import netifaces
 import os
-
 import pandas as pd
 
+import netifaces
+
 from utils import generate_qr, send_email
+
+flask_process = None
+attendance_list = None
 
 
 def get_local_ip_address():
@@ -23,10 +25,6 @@ def get_local_ip_address():
                     return ip_address
 
     return None
-
-
-flask_process = None
-attendance_list = None
 
 
 def blast_qr_code():
